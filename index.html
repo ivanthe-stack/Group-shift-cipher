@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Cipher</title>
+</head>
+<body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f5f5f5;">
+<h2 style="color: #333; text-align: center;">Letter Cipher Canvas</h2>
+<label style="font-weight: bold;">Message:</label><br>
+<textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"></textarea><br>
+<label style="font-weight: bold;">Numeric Key:</label><br>
+<input type="tel" id="keyInput" inputmode="numeric" pattern="[0-9]*" style="width: 90%; max-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"><br>
+<div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+  <button onclick="encrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #007BFF; color: white; font-size: 16px; cursor: pointer;">Encrypt</button>
+    <button onclick="decrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #28A745; color: white; font-size: 16px; cursor: pointer;">Decrypt</button>
+      <button onclick="copyOutput()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #6C757D; color: white; font-size: 16px; cursor: pointer;">Copy Output</button>
+      </div>
+      <label style="font-weight: bold;">Output:</label><br>
+      <textarea id="outputBox" rows="4" readonly style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #e9ecef; font-size: 16px;"></textarea>
+      <canvas id="cipherCanvas" width="350" height="150" style="border:1px solid #000; border-radius: 8px; background-color: #fff; max-width: 90%;"></canvas>
+      <script>
+      const canvas = document.getElementById('cipherCanvas');
+      const ctx = canvas.getContext('2d');
+      const outputBox = document.getElementById('outputBox');
+
+      function shiftLetter(char, shiftAmount) {
+        if (!/[A-Z]/i.test(char)) return char;
+          const base = char === char.toUpperCase() ? 65 : 97;
+            return String.fromCharCode(((char.charCodeAt(0) - base + shiftAmount) % 26 + 26) % 26 + base);
+            }
+
+            function encrypt() {
+              const messageInput = document.getElementById('messageInput');
+                const keyInput = document.getElementById('keyInput');
+                  let message = messageInput.value;
+                    let key = keyInput.value.replace(/[^0-9]/g, '');
+                      if (!key) return;
+                        let output = '';
+                          for (let i = 0; i < message.length; i++) {
+                              const shift = parseInt(key[i % key.length], 10);
+                                  output += shiftLetter(message[i], shift);
+                                    }
+                                      drawCanvas(message, key, output);
+                                        outputBox.value = output;
+                                        }
+
+                                        function decrypt() {
+                                          const messageInput = document.getElementById('messageInput');
+                                            const keyInput = document.getElementById('keyInput');
+                                              let message = messageInput.value;
+                                                let key = keyInput.value.replace(/[^0-9]/g, '');
+                                                  if (!key) return;
+                                                    let output = '';
+                                                      for (let i = 0; i < message.length; i++) {
+                                                          const shift = parseInt(key[i % key.length], 10);
+                                                              output += shiftLetter(message[i], -shift);
+                                                                }
+                                                                  drawCanvas(message, key, output);
+                                                                    outputBox.value = output;
+                                                                    }
+
+                                                                    function drawCanvas(message, key, output) {
+                                                                      ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                                        ctx.font = '16px monospace';
+                                                                          ctx.fillStyle = '#000';
+                                                                            ctx.fillText(`Message: ${message}`, 10, 30);
+                                                                              ctx.fillText(`Key: ${key}`, 10, 60);
+                                                                                ctx.fillText(`Output: ${output}`, 10, 90);
+                                                                                }
+
+                                                                                function copyOutput() {
+                                                                                  outputBox.select();
+                                                                                    outputBox.setSelectionRange(0, 99999);
+                                                                                      document.execCommand('copy');
+                                                                                        alert('Output copied to clipboard!');
+                                                                                        }
+                                                                                        </script>
+                                                                                        </body>
+                                                                                        </html>
+                                                                                        
