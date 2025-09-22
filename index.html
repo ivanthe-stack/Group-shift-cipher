@@ -1,81 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Letter Cipher</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Cipher</title>
 </head>
 <body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f5f5f5;">
-<h2 style="color: #333; text-align: center;">Letter Cipher Canvas</h2>
-<label style="font-weight: bold;">Message:</label><br>
-<textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"></textarea><br>
-<label style="font-weight: bold;">Numeric Key:</label><br>
-<input type="tel" id="keyInput" inputmode="numeric" pattern="[0-9]*" style="width: 90%; max-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"><br>
-<div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-  <button onclick="encrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #007BFF; color: white; font-size: 16px; cursor: pointer;">Encrypt</button>
-    <button onclick="decrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #28A745; color: white; font-size: 16px; cursor: pointer;">Decrypt</button>
-      <button onclick="copyOutput()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #6C757D; color: white; font-size: 16px; cursor: pointer;">Copy Output</button>
-      </div>
-      <label style="font-weight: bold;">Output:</label><br>
-      <textarea id="outputBox" rows="4" readonly style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #e9ecef; font-size: 16px;"></textarea>
-      <canvas id="cipherCanvas" width="350" height="150" style="border:1px solid #000; border-radius: 8px; background-color: #fff; max-width: 90%;"></canvas>
-      <script>
-      const canvas = document.getElementById('cipherCanvas');
-      const ctx = canvas.getContext('2d');
-      const outputBox = document.getElementById('outputBox');
+    <h2 style="color: #333; text-align: center;">Letter Cipher Canvas</h2>
+    
+    <label style="font-weight: bold;">Message:</label><br>
+    <textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"></textarea><br>
+    
+    <label style="font-weight: bold;">Numeric Key:</label><br>
+    <input type="tel" id="keyInput" inputmode="numeric" pattern="[0-9]*" style="width: 90%; max-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"><br>
+    
+    <label style="font-weight: bold;">Alphabet:</label><br>
+    <select id="alphabetSelect" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; font-size: 16px;">
+        <option value="english">English (26 letters: a-z)</option>
+        <option value="extended">English (a-z) + space + digits (0-9) [total 37 chars]</option>
+        <option value="bulgarian">Bulgarian (30 letters: а б в ... ъ ю я)</option>
+        <option value="bulgarianExtended">Bulgarian (а-ю я) + space + digits (0-9) [total 41 chars]</option>
+        <option value="combined">Bulgarian (30) + English (26) [total 56 letters, Bulgarian first]</option>
+        <option value="combinedExtended">Combined (Bulgarian + English) + space + digits (0-9) [total 67 chars]</option>
+    </select>
 
-      function shiftLetter(char, shiftAmount) {
-        if (!/[A-Z]/i.test(char)) return char;
-          const base = char === char.toUpperCase() ? 65 : 97;
-            return String.fromCharCode(((char.charCodeAt(0) - base + shiftAmount) % 26 + 26) % 26 + base);
+    <div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+        <button onclick="encrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #007BFF; color: white; font-size: 16px; cursor: pointer;">Encrypt</button>
+        <button onclick="decrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #28A745; color: white; font-size: 16px; cursor: pointer;">Decrypt</button>
+        <button onclick="copyOutput()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #6C757D; color: white; font-size: 16px; cursor: pointer;">Copy Output</button>
+    </div>
+
+    <label style="font-weight: bold;">Output:</label><br>
+    <textarea id="outputBox" rows="4" readonly style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #e9ecef; font-size: 16px;"></textarea>
+
+    <canvas id="cipherCanvas" width="350" height="150" style="border:1px solid #000; border-radius: 8px; background-color: #fff; max-width: 90%;"></canvas>
+
+    <script>
+        const canvas = document.getElementById('cipherCanvas');
+        const ctx = canvas.getContext('2d');
+        const outputBox = document.getElementById('outputBox');
+
+        function getAlphabet() {
+            const choice = document.getElementById('alphabetSelect').value;
+            switch (choice) {
+                case 'english': return 'abcdefghijklmnopqrstuvwxyz';
+                case 'extended': return 'abcdefghijklmnopqrstuvwxyz 0123456789';
+                case 'bulgarian': return 'абвгдежзийклмнопрстуфхцчшщъьюя';
+                case 'bulgarianExtended': return 'абвгдежзийклмнопрстуфхцчшщъьюя 0123456789';
+                case 'combined': return 'абвгдежзийклмнопрстуфхцчшщъьюяabcdefghijklmnopqrstuvwxyz';
+                case 'combinedExtended': return 'абвгдежзийклмнопрстуфхцчшщъьюяabcdefghijklmnopqrstuvwxyz 0123456789';
+                default: return 'abcdefghijklmnopqrstuvwxyz';
+            }
+        }
+
+        function shiftLetter(char, shiftAmount, alphabet) {
+            const index = alphabet.indexOf(char);
+            if (index === -1) return char;
+            const newIndex = (index + shiftAmount + alphabet.length * 100) % alphabet.length; // *100 ensures positive modulo for negative shifts
+            return alphabet[newIndex];
+        }
+
+        function cleanKey(input) {
+            return input.replace(/[^0-9]/g, '');
+        }
+
+        function processMessage(message, key, alphabet, isEncrypt) {
+            if (!key || !message.trim()) {
+                alert('Enter both a message and a numeric key!');
+                return '';
             }
 
-            function encrypt() {
-              const messageInput = document.getElementById('messageInput');
-                const keyInput = document.getElementById('keyInput');
-                  let message = messageInput.value;
-                    let key = keyInput.value.replace(/[^0-9]/g, '');
-                      if (!key) return;
-                        let output = '';
-                          for (let i = 0; i < message.length; i++) {
-                              const shift = parseInt(key[i % key.length], 10);
-                                  output += shiftLetter(message[i], shift);
-                                    }
-                                      drawCanvas(message, key, output);
-                                        outputBox.value = output;
-                                        }
+            let output = '';
+            let keyIndex = 0;
+            for (let i = 0; i < message.length; i++) {
+                const char = message[i];
+                if (alphabet.indexOf(char) === -1) {
+                    output += char;
+                    continue;
+                }
 
-                                        function decrypt() {
-                                          const messageInput = document.getElementById('messageInput');
-                                            const keyInput = document.getElementById('keyInput');
-                                              let message = messageInput.value;
-                                                let key = keyInput.value.replace(/[^0-9]/g, '');
-                                                  if (!key) return;
-                                                    let output = '';
-                                                      for (let i = 0; i < message.length; i++) {
-                                                          const shift = parseInt(key[i % key.length], 10);
-                                                              output += shiftLetter(message[i], -shift);
-                                                                }
-                                                                  drawCanvas(message, key, output);
-                                                                    outputBox.value = output;
-                                                                    }
+                let shift;
+                do {
+                    shift = parseInt(key[keyIndex % key.length], 10);
+                    keyIndex++;
+                } while (isNaN(shift));
 
-                                                                    function drawCanvas(message, key, output) {
-                                                                      ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                                                        ctx.font = '16px monospace';
-                                                                          ctx.fillStyle = '#000';
-                                                                            ctx.fillText(`Message: ${message}`, 10, 30);
-                                                                              ctx.fillText(`Key: ${key}`, 10, 60);
-                                                                                ctx.fillText(`Output: ${output}`, 10, 90);
-                                                                                }
+                const adjustedShift = isEncrypt ? shift : -shift;
+                output += shiftLetter(char, adjustedShift, alphabet);
+            }
+            return output;
+        }
 
-                                                                                function copyOutput() {
-                                                                                  outputBox.select();
-                                                                                    outputBox.setSelectionRange(0, 99999);
-                                                                                      document.execCommand('copy');
-                                                                                        alert('Output copied to clipboard!');
-                                                                                        }
-                                                                                        </script>
-                                                                                        </body>
-                                                                                        </html>
-                                                                                        
+        function encrypt() {
+            try {
+                const messageInput = document.getElementById('messageInput');
+                const alphabet = getAlphabet();
+                const message = messageInput.value.toLowerCase();
+                const key = cleanKey(document.getElementById('keyInput').value);
+                const output = processMessage(message, key, alphabet, true);
+                drawCanvas(message, key, output, true);
+                outputBox.value = output;
+            } catch (err) {
+                console.error('Encryption error:', err);
+                alert('Encryption failed: ' + err.message);
+            }
+        }
+
+        function decrypt() {
+            try {
+                const messageInput = document.getElementById('messageInput');
+                const alphabet = getAlphabet();
+                const message = messageInput.value.toLowerCase();
+                const key = cleanKey(document.getElementById('keyInput').value);
+                const output = processMessage(message, key, alphabet, false);
+                drawCanvas(message, key, output, false);
+                outputBox.value = output;
+            } catch (err) {
+                console.error('Decryption error:', err);
+                alert('Decryption failed: ' + err.message);
+            }
+        }
+
+        function copyOutput() {
+            outputBox.select();
+            document.execCommand('copy');
+            alert('Output copied to clipboard!');
+        }
+
+        function drawCanvas(original, key, output, isEncrypt) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const mode = isEncrypt ? 'Encrypt' : 'Decrypt';
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.fillText(`${mode} Visualization`, 10, 20);
+
+            // Draw original message
+            ctx.fillText('Original: ' + original.substring(0, 30) + (original.length > 30 ? '...' : ''), 10, 40);
+
+            // Draw key (cycled digits) - first few for the message length (up to 20 chars)
+            const keyDigits = [];
+            for (let i = 0; i < Math.min(original.length, 20); i++) {
+                keyDigits.push(key[i % key.length] || '0');
+            }
+            ctx.fillText('Key digits: ' + keyDigits.join(' '), 10, 60);
+
+            // Draw output
+            ctx.fillText('Output: ' + output.substring(0, 30) + (output.length > 30 ? '...' : ''), 10, 80);
+
+            // Optional: Add a note about how it works
+            ctx.font = '10px Arial';
+            ctx.fillText('Shifts cycle through key digits for each alphabet char.', 10, 110);
+        }
+    </script>
+</body>
+</html>
