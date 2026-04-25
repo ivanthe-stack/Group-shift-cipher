@@ -4,41 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Letter Cipher</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --button-primary: #007BFF;
+            --button-secondary: #28A745;
+            --button-tertiary: #6C757D;
+            --output-bg: #e9ecef;
+            --canvas-bg: #fff;
+            --canvas-border: #000;
+        }
+        .dark {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --input-bg: #2d2d2d;
+            --input-border: #444;
+            --button-primary: #0d6efd;
+            --button-secondary: #198754;
+            --button-tertiary: #5c636a;
+            --output-bg: #2d2d2d;
+            --canvas-bg: #2d2d2d;
+            --canvas-border: #666;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f5f5f5;">
-    <h2 style="color: #333; text-align: center;">Letter Cipher Canvas</h2>
+<body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: var(--bg-color); color: var(--text-color);">
+    <h2 style="color: var(--text-color); text-align: center;">Letter Cipher Canvas</h2>
+    
+    <button onclick="toggleDarkMode()" id="themeBtn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 8px; border: none; background-color: #6C757D; color: white; cursor: pointer;">Dark Mode</button>
     
     <label style="font-weight: bold;">Message:</label><br>
-    <textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"></textarea><br>
+    <textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); margin-bottom: 10px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);"></textarea><br>
     
-    <label style="font-weight: bold;">Numeric Key:</label><br>
-    <input type="tel" id="keyInput" inputmode="numeric" pattern="[0-9]*" style="width: 90%; max-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px;"><br>
+    <label style="font-weight: bold;">Hex Key (0-9, A-F):</label><br>
+    <input type="text" id="keyInput" style="width: 90%; max-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); margin-bottom: 10px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);"><br>
     
     <label style="font-weight: bold;">Alphabet:</label><br>
-    <select id="alphabetSelect" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; font-size: 16px;">
+    <select id="alphabetSelect" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); margin-bottom: 15px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);">
         <option value="english">English (26 letters: a-z)</option>
         <option value="extended">English (a-z) + space + digits (0-9) [total 37 chars]</option>
         <option value="bulgarian">Bulgarian (30 letters: а б в ... ъ ю я)</option>
         <option value="bulgarianExtended">Bulgarian (а-ю я) + space + digits (0-9) [total 41 chars]</option>
         <option value="combined">Bulgarian (30) + English (26) [total 56 letters, Bulgarian first]</option>
         <option value="combinedExtended">Combined (Bulgarian + English) + space + digits (0-9) [total 67 chars]</option>
+        <option value="symbolicEnglish">English + Bulgarian + space + 0-9 + punctuation [95 chars]</option>
     </select>
 
     <div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-        <button onclick="encrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #007BFF; color: white; font-size: 16px; cursor: pointer;">Encrypt</button>
-        <button onclick="decrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #28A745; color: white; font-size: 16px; cursor: pointer;">Decrypt</button>
-        <button onclick="copyOutput()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: #6C757D; color: white; font-size: 16px; cursor: pointer;">Copy Output</button>
+        <button onclick="encrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: var(--button-primary); color: white; font-size: 16px; cursor: pointer;">Encrypt</button>
+        <button onclick="decrypt()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: var(--button-secondary); color: white; font-size: 16px; cursor: pointer;">Decrypt</button>
+        <button onclick="copyOutput()" style="flex: 1 1 40%; padding: 12px 15px; border-radius: 8px; border: none; background-color: var(--button-tertiary); color: white; font-size: 16px; cursor: pointer;">Copy Output</button>
     </div>
 
     <label style="font-weight: bold;">Output:</label><br>
-    <textarea id="outputBox" rows="4" readonly style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #e9ecef; font-size: 16px;"></textarea>
+    <textarea id="outputBox" rows="4" readonly style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); margin-bottom: 15px; background-color: var(--output-bg); color: var(--text-color); font-size: 16px;"></textarea>
 
-    <canvas id="cipherCanvas" width="350" height="150" style="border:1px solid #000; border-radius: 8px; background-color: #fff; max-width: 90%;"></canvas>
+    <canvas id="cipherCanvas" width="350" height="150" style="border:1px solid var(--canvas-border); border-radius: 8px; background-color: var(--canvas-bg); max-width: 90%;"></canvas>
 
     <script>
         const canvas = document.getElementById('cipherCanvas');
         const ctx = canvas.getContext('2d');
         const outputBox = document.getElementById('outputBox');
+
+        let isDarkMode = false;
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark', isDarkMode);
+            document.getElementById('themeBtn').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+            updateCanvasColors();
+        }
 
         function getAlphabet() {
             const choice = document.getElementById('alphabetSelect').value;
@@ -49,6 +87,7 @@
                 case 'bulgarianExtended': return 'абвгдежзийклмнопрстуфхцчшщъьюя 0123456789';
                 case 'combined': return 'абвгдежзийклмнопрстуфхцчшщъьюяabcdefghijklmnopqrstuvwxyz';
                 case 'combinedExtended': return 'абвгдежзийклмнопрстуфхцчшщъьюяabcdefghijklmnopqrstuvwxyz 0123456789';
+                case 'symbolicEnglish': return 'абвгдежзийклмнопрстуфхцчшщъьюяabcdefghijklmnopqrstuvwxyz 0123456789.,!?;:\'"-/()[]{}@#$%^&*+=<>\u00a3\u20ac'; // Bulgarian + English + space + digits + common punctuation
                 default: return 'abcdefghijklmnopqrstuvwxyz';
             }
         }
@@ -61,7 +100,13 @@
         }
 
         function cleanKey(input) {
-            return input.replace(/[^0-9]/g, '');
+            var hex = input.replace(/[^0-9A-Fa-f]/g, '');
+            if (hex.length % 2 !== 0) hex = '0' + hex;
+            var pairs = [];
+            for (var i = 0; i < hex.length; i += 2) {
+                pairs.push(hex.substr(i, 2));
+            }
+            return pairs;
         }
 
         function processMessage(message, key, alphabet, isEncrypt) {
@@ -81,7 +126,7 @@
 
                 let shift;
                 do {
-                    shift = parseInt(key[keyIndex % key.length], 10);
+                    shift = parseInt(key[keyIndex % key.length], 16);
                     keyIndex++;
                 } while (isNaN(shift));
 
@@ -129,8 +174,16 @@
 
         function drawCanvas(original, key, output, isEncrypt) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const bgColor = isDarkMode ? '#2d2d2d' : '#fff';
+            const textColor = isDarkMode ? '#e0e0e0' : '#333';
+            const lineColor = isDarkMode ? '#666' : '#000';
+            
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             const mode = isEncrypt ? 'Encrypt' : 'Decrypt';
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = textColor;
             ctx.font = '12px Arial';
             ctx.fillText(`${mode} Visualization`, 10, 20);
 
