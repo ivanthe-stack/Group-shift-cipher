@@ -31,10 +31,10 @@
         }
     </style>
 </head>
-<body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: var(--bg-color); color: var(--text-color);">
+<body class="dark" style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: var(--bg-color); color: var(--text-color);">
     <h2 style="color: var(--text-color); text-align: center;">Letter Cipher Canvas</h2>
     
-    <button onclick="toggleDarkMode()" id="themeBtn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 8px; border: none; background-color: #6C757D; color: white; cursor: pointer;">Dark Mode</button>
+    <button onclick="toggleDarkMode()" id="themeBtn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 8px; border: none; background-color: #6C757D; color: white; cursor: pointer;">Light Mode</button>
     
     <label style="font-weight: bold;">Message:</label><br>
     <textarea id="messageInput" rows="4" style="width: 90%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); margin-bottom: 10px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);"></textarea><br>
@@ -69,7 +69,7 @@
         const ctx = canvas.getContext('2d');
         const outputBox = document.getElementById('outputBox');
 
-        let isDarkMode = false;
+        let isDarkMode = true;
 
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
